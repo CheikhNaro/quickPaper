@@ -20,13 +20,14 @@ search (fzf), `Enter` applies instantly, the overlay stays open so you can keep 
 | `jq` | JSON parsing (lists, focused output) |
 | `fzf` | fuzzy filtering of the wallpaper list |
 | `util-linux` (`pgrep`) | toggle detection |
-| `noto-sans` + `jetbrains-mono-nerd-font` | UI fonts (any Nerd Font works, edit `mono`/`sans` in shell.qml) |
+| `noto-sans` + a **Material Design Icons** Nerd Font variant | UI fonts. The search field draws one MDI glyph, `󰍉`, so plain FontAwesome-only fonts show a box; `JetBrainsMono Nerd Font` (or any `…-Nerd Font` with MDI) works. Edit `mono`/`sans` in shell.qml for a different one. |
 
 ### Fedora
 
 ```sh
 sudo dnf install quickshell ImageMagick ffmpeg-free jq fzf util-linux google-noto-sans-fonts
-# Nerd Font: download from https://www.nerdfonts.com (or `sudo dnf install fontawesome-fonts` as a fallback)
+# Nerd Font with MDI glyphs (needed for the 󰍉 search icon): install a "Nerd Font" patch
+# from https://www.nerdfonts.com (e.g. JetBrainsMono Nerd Font) into ~/.local/share/fonts
 ```
 
 `quickshell` is in Fedora repos since Fedora 42; on older releases build the `quickshell` AUR-equivalent
@@ -65,6 +66,15 @@ scripts/quickpaper.sh   →  ~/.local/bin/quickpaper.sh
 ```
 
 Put your wallpapers in `~/Pictures/Wallpapers` (or export `QUICKPAPER_DIR=/your/path` before launching).
+
+### Supported formats
+
+Images: `jpg` `jpeg` `png` `webp` `avif` — Videos/animated: `mp4` `webm` `mkv` `mov` `gif`
+(videos get a `▶ LIVE` badge and an ffmpeg poster frame; playback only on Noctalia).
+
+> **Tip:** prefer light formats — `webp` (~10× smaller) and `avif` (~2–3× smaller than webp)
+> load and thumbnail almost instantly, while large `png` wallpapers make the thumbnail pass and
+> the first open noticeably slower. Reserve `png` for pixel-art/wallpaper packs that need it.
 
 ## Launch, depending on your window manager
 

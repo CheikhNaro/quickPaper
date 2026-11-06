@@ -150,7 +150,7 @@ ShellRoot {
             Text {
                 id: compte
                 anchors { right: parent.right; rightMargin: 14; verticalCenter: parent.verticalCenter }
-                text: images.count ? (liste.currentIndex + 1) + " / " + images.count : "aucun"
+                text: images.count ? (liste.currentIndex + 1) + " / " + images.count : "none"
                 color: "#99ffffff"; font.family: root.mono; font.pixelSize: 12
             }
         }
