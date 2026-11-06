@@ -152,11 +152,3 @@ Tuning the carousel in `shell.qml` (top `readonly property` block):
 
 Thumbnails live in `~/.cache/quickpaper/miniatures` — delete the folder to force a rebuild.
 
-## Notes & known limits
-
-- "Centered on the current wallpaper" is only known on Noctalia (`wallpaper-get`); elsewhere the
-  carousel starts on the first card.
-- SDDM mirroring (`sync-sddm-wallpaper`) is intentionally not shipped; if you have such a script,
-  add it back at the end of `setWallpaper()` in your local copy.
-- The overlay takes exclusive keyboard focus: on compositors that refuse it to layer surfaces you
-  browse with the mouse only.
