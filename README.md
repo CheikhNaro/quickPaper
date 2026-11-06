@@ -89,8 +89,9 @@ The launcher is the same everywhere — only the keybind declaration changes.
 
 ### Umbriel / Noctalia (native support)
 
-Both backends are auto-detected: `noctalia msg wallpaper-set` applies the wallpaper (including
-animated ones), and the current wallpaper is highlighted on open.
+Both backends are auto-detected: `noctalia msg wallpaper-set` applies images and the current
+wallpaper is highlighted on open; videos go through mpvpaper (Noctalia's `wallpaper-set` does
+not play them).
 
 ```toml
 # ~/.config/umbriel/config.toml
