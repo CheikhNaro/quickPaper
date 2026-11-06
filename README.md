@@ -4,6 +4,9 @@ A keyboard-driven wallpaper carousel for Wayland, built on [Quickshell](https://
 One keybind opens a full-screen overlay: a slanted carousel of your wallpaper folder with live fuzzy
 search (fzf), `Enter` applies instantly, the overlay stays open so you can keep browsing, `Esc` closes.
 
+https://github.com/user-attachments/assets/d6bee3e5-5c60-46df-b0ee-9014dbb881b1
+
+
 - 720px thumbnail cache — only new/changed files are regenerated, in parallel
 - Images only (`jpg` `jpeg` `png` `webp` `avif`) — no video/animated wallpapers
 - Opens on the monitor you are focused on
