@@ -34,6 +34,16 @@ focused_output() {
 }
 ECRAN=$(focused_output)
 
+# ── all connected outputs (comma-separated; mpvpaper targets them for videos) ──
+all_outputs() {
+    case "$BACKEND" in
+        noctalia) umbriel outputs --json 2>/dev/null | jq -r '.[].name' | paste -sd,;;
+        hyprpaper) hyprctl monitors -j 2>/dev/null | jq -r '.[].name' | paste -sd,;;
+        swaybg)    swaymsg -t get_outputs -r 2>/dev/null | jq -r '.[].name' | paste -sd,;;
+    esac
+}
+SORTIES=$(all_outputs)
+
 # ── wallpaper directory (override with QUICKPAPER_DIR) ──
 ANIMES="$HOME/.cache/quickpaper/animes"; MINI="$HOME/.cache/quickpaper/miniatures"
 mkdir -p "$ANIMES" "$MINI"
@@ -63,7 +73,7 @@ fi
 # ── env consumed by the QML ──
 cur=""
 [[ "$BACKEND" == noctalia ]] && cur=$(noctalia msg wallpaper-get 2>/dev/null | head -1)
-export QUICKPAPER_CURRENT="$cur" QUICKPAPER_ECRAN="$ECRAN" QUICKPAPER_LISTE="$LISTE" QUICKPAPER_BACKEND="$BACKEND"
+export QUICKPAPER_CURRENT="$cur" QUICKPAPER_ECRAN="$ECRAN" QUICKPAPER_LISTE="$LISTE" QUICKPAPER_BACKEND="$BACKEND" QUICKPAPER_SORTIES="$SORTIES"
 # optional: color the UI from a theme (leave empty for the default accent)
 export QUICKPAPER_ACCENT="${QUICKPAPER_ACCENT:-$(awk '/^active_border_color/{print $2}' ~/.config/kitty/themes/noctalia.conf 2>/dev/null)}"
 

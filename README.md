@@ -5,7 +5,8 @@ One keybind opens a full-screen overlay: a slanted carousel of your wallpaper fo
 search (fzf), `Enter` applies instantly, the overlay stays open so you can keep browsing, `Esc` closes.
 
 - 720px thumbnail cache — only new/changed files are regenerated, in parallel
-- Video files (mp4/webm/mkv/mov/gif) show a `▶ LIVE` badge and a frame extracted with ffmpeg
+- Video files (mp4/webm/mkv/mov/gif) show a `▶ LIVE` badge and are **played with
+  [mpvpaper](https://github.com/GhostNaN/mpvpaper)** — one instance per output, restarted on each pick
 - Opens on the monitor you are focused on
 - Re-running the launcher while the overlay is open closes it (toggle)
 - Backend auto-detection: Noctalia, Hyprland (hyprpaper) or swaybg
@@ -19,6 +20,7 @@ search (fzf), `Enter` applies instantly, the overlay stays open so you can keep 
 | `ffmpeg` | poster frames from video wallpapers |
 | `jq` | JSON parsing (lists, focused output) |
 | `fzf` | fuzzy filtering of the wallpaper list |
+| `mpvpaper` (pulls in `mpv`) | **optional** — required to actually play video/animated wallpapers |
 | `util-linux` (`pgrep`) | toggle detection |
 | `noto-sans` + a **Material Design Icons** Nerd Font variant | UI fonts. The search field draws one MDI glyph, `󰍉`, so plain FontAwesome-only fonts show a box; `JetBrainsMono Nerd Font` (or any `…-Nerd Font` with MDI) works. Edit `mono`/`sans` in shell.qml for a different one. |
 
@@ -26,6 +28,9 @@ search (fzf), `Enter` applies instantly, the overlay stays open so you can keep 
 
 ```sh
 sudo dnf install quickshell ImageMagick ffmpeg-free jq fzf util-linux google-noto-sans-fonts
+# optional, for video wallpapers (COPR build; mpvpaper is not in the stable Fedora repos yet):
+sudo dnf install 'dnf-command(copr)'
+sudo dnf copr enable lionheartp/Hyprland && sudo dnf install mpvpaper
 # Nerd Font with MDI glyphs (needed for the 󰍉 search icon): install a "Nerd Font" patch
 # from https://www.nerdfonts.com (e.g. JetBrainsMono Nerd Font) into ~/.local/share/fonts
 ```
@@ -37,6 +42,8 @@ or use the COPR. The packaged binary is `qs`.
 
 ```sh
 sudo apt install imagemagick ffmpeg jq fzf util-linux fonts-noto
+# optional, for video wallpapers (Debian 12 / Ubuntu 24.04 and newer):
+sudo apt install mpvpaper
 # quickshell is not in Debian repos: use the official PPA or build from source:
 #   https://github.com/quickshell/quickshell (CI artifacts / cmake build with qt6-base, qt6-declarative, qt6-wayland)
 sudo apt install libqt6wayland6 qt6-declarative-dev qt6-base-dev wayland-protocols
@@ -45,7 +52,7 @@ sudo apt install libqt6wayland6 qt6-declarative-dev qt6-base-dev wayland-protoco
 ### Arch
 
 ```sh
-sudo pacman -S quickshell imagemagick ffmpeg jq fzf util-linux noto-fonts ttf-nerd-fonts-symbols
+sudo pacman -S quickshell imagemagick ffmpeg jq fzf util-linux noto-fonts ttf-nerd-fonts-symbols mpvpaper
 ```
 
 (`quickshell` is in extra since 2024; otherwise `quickshell-git` from the AUR.)
@@ -70,7 +77,7 @@ Put your wallpapers in `~/Pictures/Wallpapers` (or export `QUICKPAPER_DIR=/your/
 ### Supported formats
 
 Images: `jpg` `jpeg` `png` `webp` `avif` — Videos/animated: `mp4` `webm` `mkv` `mov` `gif`
-(videos get a `▶ LIVE` badge and an ffmpeg poster frame; playback only on Noctalia).
+(videos get a `▶ LIVE` badge, an ffmpeg poster frame in the carousel, and are played by **mpvpaper**).
 
 > **Tip:** prefer light formats — `webp` (~10× smaller) and `avif` (~2–3× smaller than webp)
 > load and thumbnail almost instantly, while large `png` wallpapers make the thumbnail pass and
@@ -94,9 +101,8 @@ animated ones), and the current wallpaper is highlighted on open.
 ### Hyprland (hyprpaper)
 
 `hyprpaper` must be running (autostart `exec-once = hyprpaper`). The picker sends
-`hyprpaper -l` (load) then `hyprpaper -s` (set) to every active monitor. Animated wallpapers are **not**
-played by hyprpaper — a still frame is applied; use `hyprwayland-scroller`/animated hyprpaper
-config if you want motion.
+`hyprpaper -l` (load) then `hyprpaper -s` (set) to every active monitor for images; videos are
+played by mpvpaper directly, so hyprpaper's animation limits do not apply.
 
 ```ini
 # hyprland.conf
@@ -105,7 +111,8 @@ bind = SUPER, W, exec, ~/.local/bin/quickpaper.sh
 
 ### Sway / wlroots compositors (swaybg)
 
-The picker kills previous `swaybg` instances and spawns one per output. Static images only.
+The picker kills previous `swaybg` instances and spawns one per output for images;
+videos again go through mpvpaper.
 
 ```
 bindsym Mod4+w exec ~/.local/bin/quickpaper.sh
@@ -158,7 +165,12 @@ Thumbnails live in `~/.cache/quickpaper/miniatures` — delete the folder to for
 
 ## Notes & known limits
 
-- The `▶ LIVE` badge reflects the file type; actual animated playback only happens on Noctalia.
+- Video playback needs `mpvpaper` installed; without it a video pick is a silent no-op
+  (the poster frame in the carousel still shows).
+- mpvpaper 1.9 quirks the picker already handles: the outputs are **one quoted positional
+  list** (`mpvpaper -f 'DP-1 HDMI-A-1' video`; `-o` is mpv options), auto-pause/stop (`-p`/`-s`)
+  freezes the video behind normal windows, and SIGTERM/SIGINT are ignored — stop it with
+  `pkill -9 -x mpvpaper` (mpv dies with it).
 - "Centered on the current wallpaper" is only known on Noctalia (`wallpaper-get`); elsewhere the
   carousel starts on the first card.
 - SDDM mirroring (`sync-sddm-wallpaper`) is intentionally not shipped; if you have such a script,

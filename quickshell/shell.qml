@@ -25,21 +25,35 @@ ShellRoot {
     function cheminCourant() {
         return liste.currentIndex >= 0 && liste.currentIndex < images.count ? images.get(liste.currentIndex).chemin : ""
     }
-    // ⏎ applies here (the overlay stays open, no relay file) then confirms.
+    // Enter applies here (the overlay stays open, no relay file) then confirms.
     // Escape closes without restoring: the visible wallpaper is already the last applied one.
-    // Backend is detected by the launcher; add a branch here for other wallpaper daemons
-    // (e.g. kanso: ["kanso", "set", c]).
+    // Videos are played by mpvpaper (https://github.com/GhostNaN/mpvpaper): its background-layer
+    // surface covers the static wallpaper on the outputs it targets. Two mpvpaper 1.9
+    // quirks: do NOT pass -p/-s (auto-pause/stop) — normal windows count as "hidden" on
+    // wlroots compositors and the video freezes; and it ignores SIGTERM/SIGINT, so stop
+    // it with pkill -9 (mpv children die with it). Backend is detected by the launcher; add a branch here for other
+    // wallpaper daemons (e.g. kanso: ["kanso", "set", c]).
     readonly property string backend: Quickshell.env("QUICKPAPER_BACKEND") || "noctalia"
+    readonly property string videoOutputs: Quickshell.env("QUICKPAPER_SORTIES") || ""
+    function outputsArgs() {
+        // mpvpaper takes ONE quoted output arg: "Name1 Name2" (or ALL). NOT -o (mpv options).
+        return "'" + videoOutputs.split(",").filter(s => s).join(" ") + "'"
+    }
     function setWallpaper(c) {
-        if (backend === "noctalia") {
-            Quickshell.execDetached(["noctalia", "msg", "wallpaper-set", c])
-        } else if (backend === "hyprpaper") {
-            Quickshell.execDetached(["sh", "-c", 'hyprpaper -l "' + c + ', " && for m in $(hyprctl monitors -j | jq -r ".[].name"); do hyprpaper -s "$m,' + c + '"; done'])
-        } else if (backend === "swaybg") {
-            Quickshell.execDetached(["sh", "-c", 'for o in $(swaymsg -t get_outputs -r | jq -r ".[].name"); do pkill -f "swaybg -o $o"; swaybg -i "' + c + '" -o "$o" & done'])
+        if (estAnime(c) && backend !== "generic") {
+            Quickshell.execDetached(["sh", "-c", "command -v mpvpaper && pkill -9 -x mpvpaper; sleep 0.3; nohup mpvpaper -f " + outputsArgs() + " '" + c + "' >/dev/null 2>&1 &"])
+        } else {
+            Quickshell.execDetached(["sh", "-c", "pkill -9 -x mpvpaper"])
+            if (backend === "noctalia") {
+                Quickshell.execDetached(["noctalia", "msg", "wallpaper-set", c])
+            } else if (backend === "hyprpaper") {
+                Quickshell.execDetached(["sh", "-c", 'hyprpaper -l "' + c + ', " && for m in $(hyprctl monitors -j | jq -r ".[].name"); do hyprpaper -s "$m,' + c + '"; done'])
+            } else if (backend === "swaybg") {
+                Quickshell.execDetached(["sh", "-c", 'for o in $(swaymsg -t get_outputs -r | jq -r ".[].name"); do pkill -f "swaybg -o $o"; swaybg -i "' + c + '" -o "$o" & done'])
+            }
+            // optional: mirror the choice to the SDDM login screen
+            Quickshell.execDetached(["sh", "-c", 'test -x "$HOME/.local/bin/sync-sddm-wallpaper" && sync-sddm-wallpaper "' + c + '"'])
         }
-        // optional: mirror the choice to the SDDM login screen
-        Quickshell.execDetached(["sh", "-c", 'test -x "$HOME/.local/bin/sync-sddm-wallpaper" && sync-sddm-wallpaper "' + c + '"'])
     }
     function valider() {
         const c = cheminCourant()
