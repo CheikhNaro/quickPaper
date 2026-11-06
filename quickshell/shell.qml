@@ -31,7 +31,7 @@ ShellRoot {
     // surface covers the static wallpaper on the outputs it targets. Two mpvpaper 1.9
     // quirks: do NOT pass -p/-s (auto-pause/stop) — normal windows count as "hidden" on
     // wlroots compositors and the video freezes; and it ignores SIGTERM/SIGINT, so stop
-    // it with pkill -9 (mpv children die with it). Backend is detected by the launcher; add a branch here for other
+    // it with pkill -9 (mpv children die with it); -o "loop" keeps the video cycling. Backend is detected by the launcher; add a branch here for other
     // wallpaper daemons (e.g. kanso: ["kanso", "set", c]).
     readonly property string backend: Quickshell.env("QUICKPAPER_BACKEND") || "noctalia"
     readonly property string videoOutputs: Quickshell.env("QUICKPAPER_SORTIES") || ""
@@ -41,7 +41,7 @@ ShellRoot {
     }
     function setWallpaper(c) {
         if (estAnime(c) && backend !== "generic") {
-            Quickshell.execDetached(["sh", "-c", "command -v mpvpaper && pkill -9 -x mpvpaper; sleep 0.3; nohup mpvpaper -f " + outputsArgs() + " '" + c + "' >/dev/null 2>&1 &"])
+            Quickshell.execDetached(["sh", "-c", "command -v mpvpaper && pkill -9 -x mpvpaper; sleep 0.3; nohup mpvpaper -f -o \"loop\" " + outputsArgs() + " '" + c + "' >/dev/null 2>&1 &"])
         } else {
             Quickshell.execDetached(["sh", "-c", "pkill -9 -x mpvpaper"])
             if (backend === "noctalia") {

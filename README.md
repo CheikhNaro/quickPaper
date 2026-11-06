@@ -169,7 +169,8 @@ Thumbnails live in `~/.cache/quickpaper/miniatures` — delete the folder to for
 - Video playback needs `mpvpaper` installed; without it a video pick is a silent no-op
   (the poster frame in the carousel still shows).
 - mpvpaper 1.9 quirks the picker already handles: the outputs are **one quoted positional
-  list** (`mpvpaper -f 'DP-1 HDMI-A-1' video`; `-o` is mpv options), auto-pause/stop (`-p`/`-s`)
+  list** (`mpvpaper -f 'DP-1 HDMI-A-1' video`; `-o` is mpv options — the picker passes
+  `-o "loop"`), auto-pause/stop (`-p`/`-s`)
   freezes the video behind normal windows, and SIGTERM/SIGINT are ignored — stop it with
   `pkill -9 -x mpvpaper` (mpv dies with it).
 - "Centered on the current wallpaper" is only known on Noctalia (`wallpaper-get`); elsewhere the
