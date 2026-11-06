@@ -5,7 +5,7 @@ set -eu
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 miss=()
-for cmd in qs magick ffmpeg jq fzf pgrep; do
+for cmd in qs magick jq fzf pgrep; do
     command -v "$cmd" >/dev/null 2>&1 || miss+=("$cmd")
 done
 if ((${#miss[@]})); then

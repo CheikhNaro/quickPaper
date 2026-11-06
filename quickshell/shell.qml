@@ -21,39 +21,24 @@ ShellRoot {
     property var tous: []
     property bool pret: false; property bool confirme: false; property bool introJoue: false
 
-    function estAnime(p) { return /\.(mp4|webm|mkv|mov|gif)$/i.test(p) }
     function cheminCourant() {
         return liste.currentIndex >= 0 && liste.currentIndex < images.count ? images.get(liste.currentIndex).chemin : ""
     }
     // Enter applies here (the overlay stays open, no relay file) then confirms.
     // Escape closes without restoring: the visible wallpaper is already the last applied one.
-    // Videos are played by mpvpaper (https://github.com/GhostNaN/mpvpaper): its background-layer
-    // surface covers the static wallpaper on the outputs it targets. Two mpvpaper 1.9
-    // quirks: do NOT pass -p/-s (auto-pause/stop) — normal windows count as "hidden" on
-    // wlroots compositors and the video freezes; and it ignores SIGTERM/SIGINT, so stop
-    // it with pkill -9 (mpv children die with it); -o "loop" keeps the video cycling. Backend is detected by the launcher; add a branch here for other
+    // Backend is detected by the launcher; add a branch here for other
     // wallpaper daemons (e.g. kanso: ["kanso", "set", c]).
     readonly property string backend: Quickshell.env("QUICKPAPER_BACKEND") || "noctalia"
-    readonly property string videoOutputs: Quickshell.env("QUICKPAPER_SORTIES") || ""
-    function outputsArgs() {
-        // mpvpaper takes ONE quoted output arg: "Name1 Name2" (or ALL). NOT -o (mpv options).
-        return "'" + videoOutputs.split(",").filter(s => s).join(" ") + "'"
-    }
     function setWallpaper(c) {
-        if (estAnime(c) && backend !== "generic") {
-            Quickshell.execDetached(["sh", "-c", "command -v mpvpaper && pkill -9 -x mpvpaper; sleep 0.3; nohup mpvpaper -f -o \"loop\" " + outputsArgs() + " '" + c + "' >/dev/null 2>&1 &"])
-        } else {
-            Quickshell.execDetached(["sh", "-c", "pkill -9 -x mpvpaper"])
-            if (backend === "noctalia") {
-                Quickshell.execDetached(["noctalia", "msg", "wallpaper-set", c])
-            } else if (backend === "hyprpaper") {
-                Quickshell.execDetached(["sh", "-c", 'hyprpaper -l "' + c + ', " && for m in $(hyprctl monitors -j | jq -r ".[].name"); do hyprpaper -s "$m,' + c + '"; done'])
-            } else if (backend === "swaybg") {
-                Quickshell.execDetached(["sh", "-c", 'for o in $(swaymsg -t get_outputs -r | jq -r ".[].name"); do pkill -f "swaybg -o $o"; swaybg -i "' + c + '" -o "$o" & done'])
-            }
-            // optional: mirror the choice to the SDDM login screen
-            Quickshell.execDetached(["sh", "-c", 'test -x "$HOME/.local/bin/sync-sddm-wallpaper" && sync-sddm-wallpaper "' + c + '"'])
+        if (backend === "noctalia") {
+            Quickshell.execDetached(["noctalia", "msg", "wallpaper-set", c])
+        } else if (backend === "hyprpaper") {
+            Quickshell.execDetached(["sh", "-c", 'hyprpaper -l "' + c + ', " && for m in $(hyprctl monitors -j | jq -r ".[].name"); do hyprpaper -s "$m,' + c + '"; done'])
+        } else if (backend === "swaybg") {
+            Quickshell.execDetached(["sh", "-c", 'for o in $(swaymsg -t get_outputs -r | jq -r ".[].name"); do pkill -f "swaybg -o $o"; swaybg -i "' + c + '" -o "$o" & done'])
         }
+        // optional: mirror the choice to the SDDM login screen
+        Quickshell.execDetached(["sh", "-c", 'test -x "$HOME/.local/bin/sync-sddm-wallpaper" && sync-sddm-wallpaper "' + c + '"'])
     }
     function valider() {
         const c = cheminCourant()
@@ -254,18 +239,6 @@ ShellRoot {
                             asynchronous: true
                             cache: true
                             smooth: true
-                        }
-                        Rectangle {
-                            visible: root.estAnime(carte.chemin)
-                            x: carte.active ? parent.width - width - 18 : (parent.width - width) / 2
-                            y: 12
-                            width: carte.active ? 86 : 26; height: 24; radius: 6
-                            color: "#cc000000"; border.color: root.accent; border.width: 1
-                            Text {
-                                anchors.centerIn: parent
-                                text: carte.active ? "▶  LIVE" : "▶"
-                                color: root.accent; font.family: root.mono; font.pixelSize: 11; font.bold: true
-                            }
                         }
                         Rectangle {
                             anchors.fill: parent
