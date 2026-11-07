@@ -67,7 +67,7 @@ quickshell/shell.qml    →  ~/.config/quickshell/quickPaper/shell.qml
 scripts/quickpaper.sh   →  ~/.local/bin/quickpaper.sh
 ```
 
-Put your wallpapers in `~/Pictures/Wallpapers` (or export `QUICKPAPER_DIR=/your/path` before launching).
+Put your [wallpapers](https://github.com/CheikhNaro/Wallpapers) in `~/Pictures/Wallpapers` (or export `QUICKPAPER_DIR=/your/path` before launching).
 
 ### Supported formats
 
